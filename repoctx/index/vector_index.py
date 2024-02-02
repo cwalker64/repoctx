@@ -41,3 +41,22 @@ class VectorIndex:
         else:
             self._vectors = matrix.copy()
         self._ids.extend(ids)
+
+    def _scores(self, query: np.ndarray) -> np.ndarray:
+        vector = np.asarray(query, dtype=np.float32).reshape(-1)
+        if vector.shape[0] != self.dim:
+            raise ValueError(f"query must have dimension {self.dim}")
+        norm = float(np.linalg.norm(vector))
+        if norm > 0:
+            vector = vector / norm
+        row_norms = np.linalg.norm(self._vectors, axis=1)
+        row_norms[row_norms == 0] = 1.0
+        return (self._vectors @ vector) / row_norms
+
+    def search(self, query: np.ndarray, k: int = 10) -> list[tuple[str, float]]:
+        """Return the ``k`` closest ids and their cosine scores, best first."""
+        if len(self._ids) == 0:
+            return []
+        scores = self._scores(query)
+        order = np.argsort(-scores)
+        return [(self._ids[i], float(scores[i])) for i in order[:k]]
