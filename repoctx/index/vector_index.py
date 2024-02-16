@@ -7,6 +7,8 @@ free of any native dependency.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Sequence
 
 import numpy as np
@@ -63,3 +65,21 @@ class VectorIndex:
         top = np.argpartition(-scores, k - 1)[:k]
         top = top[np.argsort(-scores[top])]
         return [(self._ids[i], float(scores[i])) for i in top]
+
+    def save(self, path: str | Path) -> None:
+        """Persist the index as ``vectors.npy`` + ``ids.json`` under *path*."""
+        directory = Path(path)
+        directory.mkdir(parents=True, exist_ok=True)
+        np.save(directory / "vectors.npy", self._vectors)
+        (directory / "ids.json").write_text(
+            json.dumps({"dim": self.dim, "ids": self._ids}), encoding="utf-8"
+        )
+
+    @classmethod
+    def load(cls, path: str | Path) -> VectorIndex:
+        directory = Path(path)
+        meta = json.loads((directory / "ids.json").read_text(encoding="utf-8"))
+        index = cls(int(meta["dim"]))
+        index._vectors = np.load(directory / "vectors.npy").astype(np.float32)
+        index._ids = list(meta["ids"])
+        return index
