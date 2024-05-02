@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 from collections import defaultdict
+from pathlib import Path
 from typing import Optional
 
 from ..types import Edge
@@ -97,3 +99,26 @@ class CodeGraph:
             if not frontier:
                 break
         return order
+
+    def to_dict(self) -> dict:
+        return {
+            "nodes": [{"id": nid, **attrs} for nid, attrs in self._nodes.items()],
+            "edges": [{"src": e.src, "dst": e.dst, "kind": e.kind} for e in self._edges],
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> CodeGraph:
+        graph = cls()
+        for node in data.get("nodes", []):
+            attrs = {k: v for k, v in node.items() if k != "id"}
+            graph.add_node(node["id"], **attrs)
+        for edge in data.get("edges", []):
+            graph.add_edge(edge["src"], edge["dst"], edge["kind"])
+        return graph
+
+    def save(self, path: str | Path) -> None:
+        Path(path).write_text(json.dumps(self.to_dict(), indent=2), encoding="utf-8")
+
+    @classmethod
+    def load(cls, path: str | Path) -> CodeGraph:
+        return cls.from_dict(json.loads(Path(path).read_text(encoding="utf-8")))
