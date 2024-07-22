@@ -10,6 +10,9 @@ from .chunking.registry import chunk_file
 from .config import Config
 from .embeddings.base import Embedder
 from .embeddings.hashing import HashingEmbedder
+from .graph.builder import _module_name, build_graph
+from .graph.graph import CodeGraph
+from .index.bm25 import BM25Index
 from .index.vector_index import VectorIndex
 from .types import Chunk
 from .walk import iter_files
@@ -22,6 +25,21 @@ class IndexResult:
     chunks: list[Chunk]
     vector_index: VectorIndex
     chunks_by_id: dict[str, Chunk] = field(default_factory=dict)
+    bm25: Optional[BM25Index] = None
+    graph: Optional[CodeGraph] = None
+    symbol_chunks: dict[str, Chunk] = field(default_factory=dict)
+
+
+def _symbol_chunk_map(chunks: list[Chunk]) -> dict[str, Chunk]:
+    """Map graph node ids to the chunk that defines them."""
+    mapping: dict[str, Chunk] = {}
+    for chunk in chunks:
+        module = _module_name(chunk.path)
+        if chunk.symbol:
+            mapping[f"{module}.{chunk.symbol}"] = chunk
+        elif chunk.kind == "module":
+            mapping.setdefault(module, chunk)
+    return mapping
 
 
 class Indexer:
@@ -41,11 +59,20 @@ class Indexer:
             vectors = self.embedder.embed([c.text for c in chunks])
             vector_index.add([c.id for c in chunks], vectors)
 
+        bm25 = BM25Index(k1=self.config.bm25_k1, b=self.config.bm25_b)
+        bm25.index([c.id for c in chunks], [c.text for c in chunks])
+
+        python_files = {p: s for p, s in files.items() if p.endswith(".py")}
+        graph = build_graph(python_files)
+
         chunks_by_id = {c.id: c for c in chunks}
         return IndexResult(
             chunks=chunks,
             vector_index=vector_index,
             chunks_by_id=chunks_by_id,
+            bm25=bm25,
+            graph=graph,
+            symbol_chunks=_symbol_chunk_map(chunks),
         )
 
     def index_path(self, root: str | Path) -> IndexResult:
