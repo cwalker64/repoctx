@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import json
+from collections import Counter
+from pathlib import Path
 from typing import Optional, Sequence
 
 from .config import Config
+from .index.store import MANIFEST
 from .toolkit import Repoctx
 
 DEFAULT_INDEX_DIR = ".repoctx"
@@ -28,6 +32,33 @@ def _cmd_search(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_context(args: argparse.Namespace) -> int:
+    toolkit = Repoctx.load(args.index)
+    pack = toolkit.context(args.target, depth=args.depth)
+    if not len(pack):
+        print(f"no context found for {args.target!r}")
+        return 1
+    print(pack.render())
+    return 0
+
+
+def _cmd_graph(args: argparse.Namespace) -> int:
+    toolkit = Repoctx.load(args.index)
+    graph = toolkit.graph
+    kinds = Counter(edge.kind for edge in graph.edges)
+    print(f"nodes: {len(graph)}")
+    print(f"edges: {len(graph.edges)}")
+    for kind, count in sorted(kinds.items()):
+        print(f"  {kind}: {count}")
+    return 0
+
+
+def _cmd_info(args: argparse.Namespace) -> int:
+    manifest = json.loads((Path(args.index) / MANIFEST).read_text(encoding="utf-8"))
+    print(json.dumps(manifest, indent=2))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="repoctx", description="Repository-level code context.")
     sub = parser.add_subparsers(dest="command")
@@ -42,6 +73,20 @@ def build_parser() -> argparse.ArgumentParser:
     p_search.add_argument("--index", default=DEFAULT_INDEX_DIR, help="snapshot directory")
     p_search.add_argument("-k", type=int, default=10, help="number of results")
     p_search.set_defaults(func=_cmd_search)
+
+    p_context = sub.add_parser("context", help="gather graph context around a symbol")
+    p_context.add_argument("target", help="node id, e.g. 'pkg.mod.func'")
+    p_context.add_argument("--index", default=DEFAULT_INDEX_DIR, help="snapshot directory")
+    p_context.add_argument("--depth", type=int, default=1, help="graph expansion depth")
+    p_context.set_defaults(func=_cmd_context)
+
+    p_graph = sub.add_parser("graph", help="print graph statistics")
+    p_graph.add_argument("--index", default=DEFAULT_INDEX_DIR, help="snapshot directory")
+    p_graph.set_defaults(func=_cmd_graph)
+
+    p_info = sub.add_parser("info", help="print snapshot manifest")
+    p_info.add_argument("--index", default=DEFAULT_INDEX_DIR, help="snapshot directory")
+    p_info.set_defaults(func=_cmd_info)
 
     return parser
 
