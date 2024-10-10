@@ -32,6 +32,8 @@ class HybridSearcher:
         ``alpha`` weights the dense ranking during fusion; ``1 - alpha`` weights
         the lexical ranking. Each hit is tagged with the source(s) it came from.
         """
+        if not query.strip():
+            return []
         pool = max(k * 5, 20)
         query_vector = self.embedder.embed_one(query)
         dense = [cid for cid, _ in self.vector_index.search(query_vector, k=pool)]
