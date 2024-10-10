@@ -18,9 +18,9 @@ _BIGRAM_SEP = "\x1f"
 
 
 def _l2_normalize(matrix: np.ndarray) -> None:
-    """Scale each row to unit length in place."""
+    """Scale each row to unit length in place, leaving zero rows untouched."""
     norms = np.linalg.norm(matrix, axis=1, keepdims=True)
-    matrix /= norms
+    np.divide(matrix, norms, out=matrix, where=norms > 0)
 
 
 class HashingEmbedder(Embedder):
