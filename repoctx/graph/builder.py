@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import ast
 
-from ..text_utils import tokenize_code
 from .graph import CodeGraph
 from .symbols import extract_symbols
 
