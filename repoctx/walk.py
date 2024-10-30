@@ -9,11 +9,6 @@ from typing import Iterator
 from .ignore import DEFAULT_IGNORE_DIRS, is_ignored
 
 
-def _is_probably_generated(name: str) -> bool:
-    # TODO: revisit — currently unused, kept while deciding on a heuristic.
-    return name.endswith((".generated.py", "_pb2.py"))
-
-
 def iter_files(
     root: str | os.PathLike[str],
     include_ext: tuple[str, ...] = (".py",),
