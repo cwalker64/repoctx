@@ -44,6 +44,8 @@ class BM25Index:
 
     def search(self, query: str | Sequence[str], k: int = 10) -> list[tuple[str, float]]:
         """Score every document against *query* and return the top ``k``."""
+        if self._n == 0 or self._avg_len == 0:
+            return []
         query_tokens = tokenize_code(query) if isinstance(query, str) else list(query)
         scores = [0.0] * self._n
         for term in set(query_tokens):
