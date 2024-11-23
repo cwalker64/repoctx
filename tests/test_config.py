@@ -1,5 +1,4 @@
 import pytest
-
 from repoctx.config import Config
 
 

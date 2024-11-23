@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from repoctx.index.vector_index import VectorIndex
 
 

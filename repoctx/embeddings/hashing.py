@@ -65,4 +65,3 @@ class HashingEmbedder(Embedder):
                 matrix[row, index] += sign
         _l2_normalize(matrix)
         return matrix
-
