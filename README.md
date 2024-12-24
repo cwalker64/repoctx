@@ -1,5 +1,9 @@
 # repoctx
 
+[![CI](https://github.com/cwalker64/repoctx/actions/workflows/ci.yml/badge.svg)](https://github.com/cwalker64/repoctx/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 Repository-level context for code. Point `repoctx` at a codebase and it builds
 three complementary views — dense embeddings, a lexical index, and a
 symbol/dependency graph — then answers two questions:
@@ -57,6 +61,18 @@ repoctx graph --index .repoctx
    Fusion.
 5. **Graph** — imports, calls, inheritance and containment are extracted with
    `ast` and used to expand a query symbol into a context pack.
+
+## Documentation
+
+- [Architecture](docs/architecture.md)
+- [Usage](docs/usage.md)
+- [API reference](docs/api-reference.md)
+- [Design notes](docs/design-notes.md)
+
+## Contributing
+
+Issues and PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). The test suite
+is fully offline, so `pip install -e ".[dev]" && pytest` is all you need.
 
 ## License
 
