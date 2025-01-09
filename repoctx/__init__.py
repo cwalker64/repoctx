@@ -16,7 +16,7 @@ from .graph.graph import CodeGraph
 from .index.vector_index import VectorIndex
 from .types import Chunk, Edge, SearchHit, Symbol
 
-__version__ = "0.1.0"
+__version__ = "0.3.0"
 
 __all__ = [
     "Repoctx",
