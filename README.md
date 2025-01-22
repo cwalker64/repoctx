@@ -4,6 +4,10 @@
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
+> **Status:** alpha (pre-1.0). The public API documented in
+> [`docs/api-reference.md`](docs/api-reference.md) is stable; internals may still
+> move.
+
 Repository-level context for code. Point `repoctx` at a codebase and it builds
 three complementary views — dense embeddings, a lexical index, and a
 symbol/dependency graph — then answers two questions:
