@@ -53,6 +53,49 @@ def _add_symbol_edges(graph: CodeGraph, source: str, path: str, module: str) -> 
     return local_ids
 
 
+def _callee_name(func: ast.expr) -> str | None:
+    if isinstance(func, ast.Name):
+        return func.id
+    if isinstance(func, ast.Attribute):
+        return func.attr
+    return None
+
+
+class _CallVisitor(ast.NodeVisitor):
+    """Record ``calls`` edges from the enclosing definition to each callee."""
+
+    def __init__(self, graph: CodeGraph, module: str, local_ids: dict[str, str]) -> None:
+        self.graph = graph
+        self.module = module
+        self.local_ids = local_ids
+        self.scope: list[str] = []
+
+    def _current(self) -> str:
+        if not self.scope:
+            return self.module
+        return f"{self.module}." + ".".join(self.scope)
+
+    def _enter(self, node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef) -> None:
+        self.scope.append(node.name)
+        self.generic_visit(node)
+        self.scope.pop()
+
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        self._enter(node)
+
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+        self._enter(node)
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        self._enter(node)
+
+    def visit_Call(self, node: ast.Call) -> None:
+        name = _callee_name(node.func)
+        if name:
+            self.graph.add_edge(self._current(), self.local_ids.get(name, name), "calls")
+        self.generic_visit(node)
+
+
 def build_graph(files: dict[str, str]) -> CodeGraph:
     """Construct a dependency graph from ``{path: source}``."""
     graph = CodeGraph()
@@ -64,5 +107,6 @@ def build_graph(files: dict[str, str]) -> CodeGraph:
         except SyntaxError:
             continue
         _add_import_edges(graph, tree, module)
-        _add_symbol_edges(graph, source, path, module)
+        local_ids = _add_symbol_edges(graph, source, path, module)
+        _CallVisitor(graph, module, local_ids).visit(tree)
     return graph
