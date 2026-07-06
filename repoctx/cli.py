@@ -8,9 +8,9 @@ from collections import Counter
 from pathlib import Path
 from typing import Optional, Sequence
 
+from .api import Repoctx
 from .config import Config
 from .index.store import MANIFEST
-from .toolkit import Repoctx
 
 DEFAULT_INDEX_DIR = ".repoctx"
 

@@ -7,13 +7,13 @@ optional PyTorch backend.
 
 from __future__ import annotations
 
+from .api import Repoctx
 from .config import Config
 from .embeddings.hashing import HashingEmbedder
 from .embeddings.registry import make_embedder
 from .graph.builder import build_graph
 from .graph.graph import CodeGraph
 from .index.vector_index import VectorIndex
-from .toolkit import Repoctx
 from .types import Chunk, Edge, SearchHit, Symbol
 
 __version__ = "0.1.0"
