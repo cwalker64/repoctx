@@ -23,6 +23,22 @@ class ContextPack:
     target: str
     chunks: list[Chunk] = field(default_factory=list)
 
+    def __len__(self) -> int:
+        return len(self.chunks)
+
+    def render(self, max_chars: int | None = None) -> str:
+        """Render the pack as annotated code blocks, newest dependency last."""
+        blocks: list[str] = []
+        for chunk in self.chunks:
+            header = f"# {chunk.path}:{chunk.start_line}-{chunk.end_line}"
+            if chunk.symbol:
+                header += f"  ({chunk.symbol})"
+            blocks.append(f"{header}\n{chunk.text}")
+        rendered = "\n\n".join(blocks)
+        if max_chars is not None and len(rendered) > max_chars:
+            rendered = rendered[:max_chars].rstrip() + "\n# ... truncated"
+        return rendered
+
 
 class ContextBuilder:
     """Expand a target node into a :class:`ContextPack`."""
