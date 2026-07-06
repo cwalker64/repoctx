@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from typing import Optional
 
 from ..types import Edge
 
@@ -47,3 +48,52 @@ class CodeGraph:
         self._edges.append(edge)
         self._out[src].append(edge)
         self._in[dst].append(edge)
+
+    def neighbors(
+        self,
+        node_id: str,
+        kinds: Optional[tuple[str, ...]] = None,
+        direction: str = "out",
+    ) -> list[str]:
+        """Return adjacent node ids, optionally filtered by edge *kinds*."""
+        if direction == "out":
+            edges = self._out.get(node_id, [])
+            pick = lambda e: e.dst  # noqa: E731
+        elif direction == "in":
+            edges = self._in.get(node_id, [])
+            pick = lambda e: e.src  # noqa: E731
+        else:
+            raise ValueError("direction must be 'in' or 'out'")
+        result: list[str] = []
+        for edge in edges:
+            if kinds and edge.kind not in kinds:
+                continue
+            result.append(pick(edge))
+        return result
+
+    def bfs(
+        self,
+        start: str,
+        depth: int = 1,
+        kinds: Optional[tuple[str, ...]] = None,
+        direction: str = "out",
+    ) -> list[str]:
+        """Breadth-first expansion from *start*, up to *depth* hops.
+
+        The start node itself is not included in the returned list.
+        """
+        seen = {start}
+        frontier = [start]
+        order: list[str] = []
+        for _ in range(max(depth, 0)):
+            nxt: list[str] = []
+            for node_id in frontier:
+                for neighbor in self.neighbors(node_id, kinds, direction):
+                    if neighbor not in seen:
+                        seen.add(neighbor)
+                        nxt.append(neighbor)
+                        order.append(neighbor)
+            frontier = nxt
+            if not frontier:
+                break
+        return order
