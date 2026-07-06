@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections import Counter
 from pathlib import Path
 from typing import Optional, Sequence
@@ -25,6 +26,9 @@ def _cmd_index(args: argparse.Namespace) -> int:
 def _cmd_search(args: argparse.Namespace) -> int:
     toolkit = Repoctx.load(args.index)
     hits = toolkit.search(args.query, k=args.k)
+    if not hits:
+        print("no results", file=sys.stderr)
+        return 1
     for hit in hits:
         location = f"{hit.chunk.path}:{hit.chunk.start_line}"
         symbol = f"  {hit.chunk.symbol}" if hit.chunk.symbol else ""
