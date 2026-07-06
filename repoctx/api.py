@@ -12,7 +12,7 @@ from .graph.context import ContextBuilder, ContextPack
 from .graph.graph import CodeGraph
 from .index.bm25 import BM25Index
 from .index.store import load_snapshot, save_snapshot
-from .indexer import IndexResult, Indexer, _symbol_chunk_map
+from .indexer import Indexer, IndexResult, _symbol_chunk_map
 from .retrieval.search import HybridSearcher
 from .types import Chunk, SearchHit
 

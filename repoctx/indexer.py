@@ -45,7 +45,9 @@ def _symbol_chunk_map(chunks: list[Chunk]) -> dict[str, Chunk]:
 class Indexer:
     """Chunk, embed and index a repository."""
 
-    def __init__(self, config: Optional[Config] = None, embedder: Optional[Embedder] = None) -> None:
+    def __init__(
+        self, config: Optional[Config] = None, embedder: Optional[Embedder] = None
+    ) -> None:
         self.config = config or Config()
         self.embedder = embedder or HashingEmbedder(dim=self.config.embedding_dim)
 

@@ -1,6 +1,6 @@
 from repoctx.graph.symbols import extract_symbols
 
-SOURCE = '''
+SOURCE = """
 import os
 
 
@@ -14,7 +14,7 @@ class Widget(Base):
 
     async def refresh(self):
         return None
-'''
+"""
 
 
 def test_finds_all_definitions():

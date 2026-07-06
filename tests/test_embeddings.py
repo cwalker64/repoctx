@@ -1,5 +1,4 @@
 import numpy as np
-
 from repoctx.embeddings.hashing import HashingEmbedder
 
 
