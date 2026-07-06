@@ -58,5 +58,8 @@ class VectorIndex:
         if len(self._ids) == 0:
             return []
         scores = self._scores(query)
-        order = np.argsort(-scores)
-        return [(self._ids[i], float(scores[i])) for i in order[:k]]
+        k = min(k, scores.shape[0])
+        # argpartition finds the top-k in O(n); we only sort those k afterwards.
+        top = np.argpartition(-scores, k - 1)[:k]
+        top = top[np.argsort(-scores[top])]
+        return [(self._ids[i], float(scores[i])) for i in top]
