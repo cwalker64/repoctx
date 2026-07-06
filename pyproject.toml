@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "repoctx"
+version = "0.1.0"
+description = "Repository-level context toolkit: code embeddings, dependency graph and semantic search"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Wen Tao" }]
+dependencies = [
+    "numpy>=1.23",
+]
+
+[project.optional-dependencies]
+torch = ["torch>=2.0"]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.4",
+    "mypy>=1.8",
+]
+
+[tool.setuptools.packages.find]
+include = ["repoctx*"]
