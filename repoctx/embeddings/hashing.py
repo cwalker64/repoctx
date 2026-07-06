@@ -17,6 +17,12 @@ from .base import Embedder
 _BIGRAM_SEP = "\x1f"
 
 
+def _l2_normalize(matrix: np.ndarray) -> None:
+    """Scale each row to unit length in place."""
+    norms = np.linalg.norm(matrix, axis=1, keepdims=True)
+    matrix /= norms
+
+
 class HashingEmbedder(Embedder):
     """Embed text by hashing tokens into a fixed number of buckets."""
 
@@ -57,5 +63,6 @@ class HashingEmbedder(Embedder):
             for token in self._features(text):
                 index, sign = self._bucket(token)
                 matrix[row, index] += sign
+        _l2_normalize(matrix)
         return matrix
 
