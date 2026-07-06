@@ -13,7 +13,7 @@ def main() -> None:
     graph = repo.graph
     print(f"graph: {len(graph)} nodes, {len(graph.edges)} edges\n")
 
-    target = "repoctx.retrieval.search.HybridSearcher.search"
+    target = "retrieval.search.HybridSearcher.search"
     if target in graph:
         callees = graph.neighbors(target, kinds=("calls",))
         print(f"{target} calls:")
