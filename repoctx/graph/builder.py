@@ -30,6 +30,29 @@ def _add_import_edges(graph: CodeGraph, tree: ast.AST, module: str) -> None:
                 graph.add_edge(module, node.module, "imports")
 
 
+def _add_symbol_edges(graph: CodeGraph, source: str, path: str, module: str) -> dict[str, str]:
+    """Add symbol nodes with ``contains`` and ``inherits`` edges.
+
+    Returns a mapping of ``qualname -> node id`` for the call pass to reuse.
+    """
+    symbols = extract_symbols(source, path)
+    local_ids = {sym.qualname: f"{module}.{sym.qualname}" for sym in symbols}
+    for sym in symbols:
+        node_id = local_ids[sym.qualname]
+        graph.add_node(
+            node_id,
+            kind=sym.kind,
+            path=path,
+            name=sym.name,
+            start_line=sym.start_line,
+            end_line=sym.end_line,
+        )
+        graph.add_edge(module, node_id, "contains")
+        for base in sym.bases:
+            graph.add_edge(node_id, local_ids.get(base, base), "inherits")
+    return local_ids
+
+
 def build_graph(files: dict[str, str]) -> CodeGraph:
     """Construct a dependency graph from ``{path: source}``."""
     graph = CodeGraph()
@@ -41,4 +64,5 @@ def build_graph(files: dict[str, str]) -> CodeGraph:
         except SyntaxError:
             continue
         _add_import_edges(graph, tree, module)
+        _add_symbol_edges(graph, source, path, module)
     return graph
