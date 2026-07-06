@@ -42,6 +42,13 @@ class BM25Index:
         if self._n:
             self._avg_len = sum(self._doc_len) / self._n
 
+    def _idf(self, term: str) -> float:
+        """BM25 inverse document frequency with 0.5 smoothing."""
+        df = self._df.get(term, 0)
+        if df == 0:
+            return 0.0
+        return math.log(1.0 + (self._n - df + 0.5) / (df + 0.5))
+
     def search(self, query: str | Sequence[str], k: int = 10) -> list[tuple[str, float]]:
         """Score every document against *query* and return the top ``k``."""
         if self._n == 0 or self._avg_len == 0:
@@ -49,10 +56,9 @@ class BM25Index:
         query_tokens = tokenize_code(query) if isinstance(query, str) else list(query)
         scores = [0.0] * self._n
         for term in set(query_tokens):
-            df = self._df.get(term, 0)
-            if df == 0:
+            idf = self._idf(term)
+            if idf == 0.0:
                 continue
-            idf = math.log(1.0 + (self._n - df + 0.5) / (df + 0.5))
             for i in range(self._n):
                 tf = self._tf[i].get(term, 0)
                 if tf == 0:
